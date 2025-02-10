@@ -1,9 +1,18 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const hubContainer = document.getElementById('hubContainer');
+const gameContainer = document.getElementById('gameContainer');
+const playButton = document.getElementById('playButton');
+const levelsButton = document.getElementById('levelsButton');
+const levelsMenu = document.getElementById('levelsMenu');
 
 // Set canvas size
 canvas.width = 800;
 canvas.height = 600;
+
+// Game state
+let currentLevel = 0;
+const unlockedLevels = [0]; // Start with level 0 unlocked
 
 // Player properties
 const player = {
@@ -18,13 +27,49 @@ const player = {
     isJumping: false
 };
 
-// Platform properties
-const platforms = [
-    { x: 0, y: 550, width: 200, height: 20 },
-    { x: 300, y: 500, width: 200, height: 20 },
-    { x: 600, y: 450, width: 200, height: 20 },
-    { x: 100, y: 350, width: 200, height: 20 },
-    { x: 500, y: 300, width: 200, height: 20 }
+// Levels
+const levels = [
+    {
+        platforms: [
+            { x: 0, y: 550, width: 200, height: 20 },
+            { x: 300, y: 500, width: 200, height: 20 },
+            { x: 600, y: 450, width: 200, height: 20 }
+        ],
+        finish: { x: 700, y: 400, width: 40, height: 40 }
+    },
+    {
+        platforms: [
+            { x: 0, y: 550, width: 150, height: 20 },
+            { x: 250, y: 450, width: 150, height: 20 },
+            { x: 500, y: 350, width: 150, height: 20 }
+        ],
+        finish: { x: 600, y: 300, width: 40, height: 40 }
+    },
+    {
+        platforms: [
+            { x: 0, y: 550, width: 100, height: 20 },
+            { x: 200, y: 450, width: 100, height: 20 },
+            { x: 400, y: 350, width: 100, height: 20 },
+            { x: 600, y: 250, width: 100, height: 20 }
+        ],
+        finish: { x: 700, y: 200, width: 40, height: 40 }
+    },
+    {
+        platforms: [
+            { x: 0, y: 550, width: 200, height: 20 },
+            { x: 300, y: 450, width: 200, height: 20 },
+            { x: 600, y: 350, width: 200, height: 20 }
+        ],
+        finish: { x: 700, y: 300, width: 40, height: 40 }
+    },
+    {
+        platforms: [
+            { x: 0, y: 550, width: 200, height: 20 },
+            { x: 300, y: 450, width: 200, height: 20 },
+            { x: 600, y: 350, width: 200, height: 20 }
+        ],
+        finish: { x: 700, y: 300, width: 40, height: 40 }
+    }
 ];
 
 // Input handling
@@ -54,6 +99,46 @@ function checkCollision(rect1, rect2) {
            rect1.y + rect1.height > rect2.y;
 }
 
+// Reset player position
+function resetPlayer() {
+    player.x = 100;
+    player.y = 100;
+    player.velocityY = 0;
+    player.isJumping = false;
+}
+
+// Load a level
+function loadLevel(levelIndex) {
+    currentLevel = levelIndex;
+    resetPlayer();
+    gameContainer.classList.remove('hidden');
+    hubContainer.classList.add('hidden');
+}
+
+// Check if player reaches the finish block
+function checkFinish() {
+    const finish = levels[currentLevel].finish;
+    if (checkCollision(player, finish)) {
+        alert(`Level ${currentLevel + 1} completed!`);
+        if (!unlockedLevels.includes(currentLevel + 1)) {
+            unlockedLevels.push(currentLevel + 1);
+            updateLevelsMenu();
+        }
+        loadLevel(currentLevel + 1);
+    }
+}
+
+// Update levels menu
+function updateLevelsMenu() {
+    levelsMenu.innerHTML = '';
+    unlockedLevels.forEach(level => {
+        const button = document.createElement('button');
+        button.textContent = `Level ${level + 1}`;
+        button.addEventListener('click', () => loadLevel(level));
+        levelsMenu.appendChild(button);
+    });
+}
+
 // Game loop
 function update() {
     // Horizontal movement
@@ -72,7 +157,7 @@ function update() {
 
     // Platform collision
     player.isJumping = true;
-    platforms.forEach(platform => {
+    levels[currentLevel].platforms.forEach(platform => {
         if (checkCollision(player, platform)) {
             if (player.velocityY > 0) {
                 player.isJumping = false;
@@ -88,6 +173,9 @@ function update() {
         player.isJumping = false;
         player.velocityY = 0;
     }
+
+    // Check if player reaches the finish
+    checkFinish();
 }
 
 function draw() {
@@ -97,9 +185,14 @@ function draw() {
 
     // Draw platforms
     ctx.fillStyle = '#4CAF50';
-    platforms.forEach(platform => {
+    levels[currentLevel].platforms.forEach(platform => {
         ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
     });
+
+    // Draw finish block
+    const finish = levels[currentLevel].finish;
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(finish.x, finish.y, finish.width, finish.height);
 
     // Draw player
     ctx.fillStyle = '#FF5722';
@@ -111,6 +204,13 @@ function gameLoop() {
     draw();
     requestAnimationFrame(gameLoop);
 }
+
+// Event listeners for buttons
+playButton.addEventListener('click', () => loadLevel(0));
+levelsButton.addEventListener('click', () => {
+    levelsMenu.style.display = 'flex';
+    updateLevelsMenu();
+});
 
 // Start the game
 gameLoop();
