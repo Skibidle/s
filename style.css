@@ -11,6 +11,49 @@ body {
     overflow: hidden;
 }
 
+/* Hub container */
+.hub-container {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    color: white;
+}
+
+.hub-container h1 {
+    margin-bottom: 20px;
+}
+
+.hub-container button {
+    background: #4CAF50;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.hub-container button:hover {
+    background: #45a049;
+}
+
+.levels-menu {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.levels-menu button {
+    width: 150px;
+    margin: 5px;
+}
+
 /* Game container */
 .game-container {
     background: rgba(255, 255, 255, 0.1);
@@ -25,4 +68,9 @@ canvas {
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     display: block;
+}
+
+/* Utility class */
+.hidden {
+    display: none;
 }
