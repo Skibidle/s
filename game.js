@@ -54,6 +54,21 @@ images.dirt.src = 'assets/images/dirt.png';
 images.grass.src = 'assets/images/grass.png';
 images.finish.src = 'assets/images/finish.png';
 
+// Wait for all images to load
+let imagesLoaded = 0;
+Object.values(images).forEach(img => {
+    img.onload = () => {
+        imagesLoaded++;
+        if (imagesLoaded === Object.keys(images).length) {
+            console.log('All images loaded!');
+            gameLoop(); // Start the game once all images are loaded
+        }
+    };
+    img.onerror = () => {
+        console.error('Failed to load image:', img.src);
+    };
+});
+
 // Levels
 const levels = [
     // Level 1 - Basic introduction
