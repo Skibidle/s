@@ -31,19 +31,19 @@ const platforms = [
 const keys = {
     right: false,
     left: false,
-    space: false
+    up: false
 };
 
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') keys.right = true;
     if (e.key === 'ArrowLeft') keys.left = true;
-    if (e.key === ' ') keys.space = true;
+    if (e.key === 'ArrowUp') keys.up = true;
 });
 
 document.addEventListener('keyup', (e) => {
     if (e.key === 'ArrowRight') keys.right = false;
     if (e.key === 'ArrowLeft') keys.left = false;
-    if (e.key === ' ') keys.space = false;
+    if (e.key === 'ArrowUp') keys.up = false;
 });
 
 // Collision detection
@@ -61,7 +61,7 @@ function update() {
     if (keys.left) player.x -= player.speed;
 
     // Jumping
-    if (keys.space && !player.isJumping) {
+    if (keys.up && !player.isJumping) {
         player.velocityY = -player.jumpForce;
         player.isJumping = true;
     }
@@ -88,12 +88,6 @@ function update() {
         player.isJumping = false;
         player.velocityY = 0;
     }
-
-    // Camera follow
-    const cameraOffset = {
-        x: canvas.width/2 - player.x - player.width/2,
-        y: canvas.height/2 - player.y - player.height/2
-    };
 }
 
 function draw() {
