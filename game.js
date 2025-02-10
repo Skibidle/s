@@ -27,7 +27,7 @@ const unlockedLevels = [0]; // Start with level 0 unlocked
 
 // Player properties
 const player = {
-    x: 100,
+    x: 0, // Player is always at x = 0 (center of the screen)
     y: 100,
     width: 16,
     height: 16,
@@ -39,6 +39,14 @@ const player = {
     velocityY: 0,
     canDoubleJump: true,
     isGrounded: false
+};
+
+// Camera properties
+const camera = {
+    x: 0, // Camera's x position in the level
+    y: 0, // Camera's y position in the level
+    width: canvas.width,
+    height: canvas.height
 };
 
 // Load images
@@ -74,41 +82,45 @@ const levels = [
     // Level 1 - Basic introduction
     {
         platforms: [
-            {x: 0, y: 550, width: 800, height: 16, type: 'grass'},
-            {x: 0, y: 566, width: 800, height: 16, type: 'dirt'} // Dirt below grass
+            {x: 0, y: 550, width: 2000, height: 16, type: 'grass'}, // Longer level
+            {x: 0, y: 566, width: 2000, height: 16, type: 'dirt'} // Dirt below grass
         ],
-        finish: {x: 700, y: 534, width: 16, height: 16} // Finish block at the end
+        finish: {x: 1900, y: 534, width: 16, height: 16} // Finish block at the end
     },
 
     // Level 2 - Moving platforms
     {
         platforms: [
-            {x: 0, y: 550, width: 200, height: 16, type: 'grass'},
-            {x: 0, y: 566, width: 200, height: 16, type: 'dirt'}, // Dirt below grass
-            {x: 600, y: 550, width: 200, height: 16, type: 'grass'},
-            {x: 600, y: 566, width: 200, height: 16, type: 'dirt'} // Dirt below grass
+            {x: 0, y: 550, width: 2000, height: 16, type: 'grass'},
+            {x: 0, y: 566, width: 2000, height: 16, type: 'dirt'}, // Dirt below grass
+            {x: 500, y: 450, width: 200, height: 16, type: 'grass'},
+            {x: 500, y: 466, width: 200, height: 16, type: 'dirt'}, // Dirt below grass
+            {x: 1000, y: 350, width: 200, height: 16, type: 'grass'},
+            {x: 1000, y: 366, width: 200, height: 16, type: 'dirt'} // Dirt below grass
         ],
         movingPlatforms: [
             {x: 200, y: 500, width: 400, height: 16, speed: 2, direction: 1, type: 'grass'},
             {x: 200, y: 516, width: 400, height: 16, speed: 2, direction: 1, type: 'dirt'} // Dirt below grass
         ],
-        finish: {x: 700, y: 484, width: 16, height: 16} // Finish block at the end
+        finish: {x: 1900, y: 534, width: 16, height: 16} // Finish block at the end
     },
 
     // Level 3 - Spikes and gaps
     {
         platforms: [
-            {x: 0, y: 550, width: 200, height: 16, type: 'grass'},
-            {x: 0, y: 566, width: 200, height: 16, type: 'dirt'}, // Dirt below grass
-            {x: 300, y: 550, width: 200, height: 16, type: 'grass'},
-            {x: 300, y: 566, width: 200, height: 16, type: 'dirt'}, // Dirt below grass
-            {x: 600, y: 550, width: 200, height: 16, type: 'grass'},
-            {x: 600, y: 566, width: 200, height: 16, type: 'dirt'} // Dirt below grass
+            {x: 0, y: 550, width: 2000, height: 16, type: 'grass'},
+            {x: 0, y: 566, width: 2000, height: 16, type: 'dirt'}, // Dirt below grass
+            {x: 300, y: 450, width: 200, height: 16, type: 'grass'},
+            {x: 300, y: 466, width: 200, height: 16, type: 'dirt'}, // Dirt below grass
+            {x: 600, y: 350, width: 200, height: 16, type: 'grass'},
+            {x: 600, y: 366, width: 200, height: 16, type: 'dirt'} // Dirt below grass
         ],
         spikes: [
-            {x: 250, y: 530, width: 40, height: 20}
+            {x: 250, y: 530, width: 40, height: 20},
+            {x: 550, y: 430, width: 40, height: 20},
+            {x: 850, y: 330, width: 40, height: 20}
         ],
-        finish: {x: 700, y: 534, width: 16, height: 16} // Finish block at the end
+        finish: {x: 1900, y: 534, width: 16, height: 16} // Finish block at the end
     },
 
     // Add more levels here...
@@ -151,11 +163,22 @@ function checkCollision(rect1, rect2) {
 
 // Reset player position
 function resetPlayer() {
-    player.x = 100;
+    player.x = 0; // Player is always at x = 0
     player.y = 100;
     player.velocityX = 0;
     player.velocityY = 0;
     player.isGrounded = false;
+}
+
+// Update camera position
+function updateCamera() {
+    // Camera follows the player
+    camera.x = player.x - canvas.width / 2;
+
+    // Clamp camera to level bounds
+    const currentLevelData = levels[currentLevel];
+    const levelWidth = currentLevelData.platforms[0].width; // Assume first platform defines level width
+    camera.x = Math.max(0, Math.min(camera.x, levelWidth - canvas.width));
 }
 
 // Load a level
@@ -207,6 +230,7 @@ function update() {
     handleMovement();
     handleCollisions();
     checkFinish();
+    updateCamera();
 }
 
 function draw() {
@@ -218,7 +242,7 @@ function draw() {
     levels[currentLevel].platforms.forEach(platform => {
         const img = platform.type === 'grass' ? images.grass : images.dirt;
         for (let i = 0; i < platform.width / 16; i++) {
-            ctx.drawImage(img, platform.x + i * 16, platform.y, 16, 16);
+            ctx.drawImage(img, platform.x - camera.x + i * 16, platform.y, 16, 16);
         }
     });
 
@@ -226,13 +250,13 @@ function draw() {
     levels[currentLevel].movingPlatforms?.forEach(platform => {
         const img = platform.type === 'grass' ? images.grass : images.dirt;
         for (let i = 0; i < platform.width / 16; i++) {
-            ctx.drawImage(img, platform.x + i * 16, platform.y, 16, 16);
+            ctx.drawImage(img, platform.x - camera.x + i * 16, platform.y, 16, 16);
         }
     });
 
     // Draw finish block
     const finish = levels[currentLevel].finish;
-    ctx.drawImage(images.finish, finish.x, finish.y, finish.width, finish.height);
+    ctx.drawImage(images.finish, finish.x - camera.x, finish.y, finish.width, finish.height);
 
     // Draw player
     ctx.drawImage(images.player, player.x, player.y, player.width, player.height);
