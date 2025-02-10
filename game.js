@@ -74,34 +74,41 @@ const levels = [
     // Level 1 - Basic introduction
     {
         platforms: [
-            {x: 0, y: 550, width: 800, height: 16, type: 'dirt'}
+            {x: 0, y: 550, width: 800, height: 16, type: 'grass'},
+            {x: 0, y: 566, width: 800, height: 16, type: 'dirt'} // Dirt below grass
         ],
-        finish: {x: 700, y: 500, width: 16, height: 16}
+        finish: {x: 700, y: 534, width: 16, height: 16} // Finish block at the end
     },
 
     // Level 2 - Moving platforms
     {
         platforms: [
             {x: 0, y: 550, width: 200, height: 16, type: 'grass'},
-            {x: 600, y: 550, width: 200, height: 16, type: 'grass'}
+            {x: 0, y: 566, width: 200, height: 16, type: 'dirt'}, // Dirt below grass
+            {x: 600, y: 550, width: 200, height: 16, type: 'grass'},
+            {x: 600, y: 566, width: 200, height: 16, type: 'dirt'} // Dirt below grass
         ],
         movingPlatforms: [
-            {x: 200, y: 500, width: 400, height: 16, speed: 2, direction: 1, type: 'dirt'}
+            {x: 200, y: 500, width: 400, height: 16, speed: 2, direction: 1, type: 'grass'},
+            {x: 200, y: 516, width: 400, height: 16, speed: 2, direction: 1, type: 'dirt'} // Dirt below grass
         ],
-        finish: {x: 700, y: 400, width: 16, height: 16}
+        finish: {x: 700, y: 484, width: 16, height: 16} // Finish block at the end
     },
 
     // Level 3 - Spikes and gaps
     {
         platforms: [
-            {x: 0, y: 550, width: 200, height: 16, type: 'dirt'},
-            {x: 300, y: 550, width: 200, height: 16, type: 'dirt'},
-            {x: 600, y: 550, width: 200, height: 16, type: 'dirt'}
+            {x: 0, y: 550, width: 200, height: 16, type: 'grass'},
+            {x: 0, y: 566, width: 200, height: 16, type: 'dirt'}, // Dirt below grass
+            {x: 300, y: 550, width: 200, height: 16, type: 'grass'},
+            {x: 300, y: 566, width: 200, height: 16, type: 'dirt'}, // Dirt below grass
+            {x: 600, y: 550, width: 200, height: 16, type: 'grass'},
+            {x: 600, y: 566, width: 200, height: 16, type: 'dirt'} // Dirt below grass
         ],
         spikes: [
             {x: 250, y: 530, width: 40, height: 20}
         ],
-        finish: {x: 700, y: 500, width: 16, height: 16}
+        finish: {x: 700, y: 534, width: 16, height: 16} // Finish block at the end
     },
 
     // Add more levels here...
