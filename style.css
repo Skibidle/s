@@ -54,6 +54,15 @@ body {
     margin: 5px;
 }
 
+.levels-menu button.unlocked {
+    background: #4CAF50;
+}
+
+.levels-menu button.locked {
+    background: #808080;
+    cursor: not-allowed;
+}
+
 /* Game container */
 .game-container {
     background: rgba(255, 255, 255, 0.1);
@@ -68,6 +77,40 @@ canvas {
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     display: block;
+}
+
+/* Finished popup */
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+.popup.hidden {
+    display: none;
+}
+
+.popup button {
+    background: #4CAF50;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.popup button:hover {
+    background: #45a049;
 }
 
 /* Utility class */
