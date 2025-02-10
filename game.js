@@ -8,6 +8,12 @@ const levelsMenu = document.getElementById('levelsMenu');
 const finishedPopup = document.getElementById('finishedPopup');
 const nextLevelButton = document.getElementById('nextLevelButton');
 const mainMenuButton = document.getElementById('mainMenuButton');
+const currentLevelDisplay = document.getElementById('currentLevel');
+const coinCounter = document.getElementById('coinCounter');
+const livesCounter = document.getElementById('livesCounter');
+const touchLeft = document.querySelector('.touch-left');
+const touchRight = document.querySelector('.touch-right');
+const touchJump = document.querySelector('.touch-jump');
 
 // Set canvas size
 canvas.width = 800;
@@ -15,64 +21,75 @@ canvas.height = 600;
 
 // Game state
 let currentLevel = 0;
+let score = 0;
+let lives = 3;
 const unlockedLevels = [0]; // Start with level 0 unlocked
 
 // Player properties
 const player = {
     x: 100,
     y: 100,
-    width: 40,
-    height: 40,
-    speed: 5,
-    jumpForce: 15,
-    gravity: 0.8,
+    width: 16,
+    height: 16,
+    speed: 0.3,
+    maxSpeed: 5,
+    jumpForce: 12,
+    gravity: 0.5,
+    velocityX: 0,
     velocityY: 0,
-    isJumping: false
+    canDoubleJump: true,
+    isGrounded: false
 };
+
+// Load images
+const images = {
+    player: new Image(),
+    dirt: new Image(),
+    grass: new Image(),
+    finish: new Image()
+};
+
+images.player.src = 'assets/images/player.png';
+images.dirt.src = 'assets/images/dirt.png';
+images.grass.src = 'assets/images/grass.png';
+images.finish.src = 'assets/images/finish.png';
 
 // Levels
 const levels = [
+    // Level 1 - Basic introduction
     {
         platforms: [
-            { x: 0, y: 550, width: 200, height: 20 },
-            { x: 300, y: 500, width: 200, height: 20 },
-            { x: 600, y: 450, width: 200, height: 20 }
+            {x: 0, y: 550, width: 800, height: 16, type: 'dirt'}
         ],
-        finish: { x: 700, y: 400, width: 40, height: 40 }
+        finish: {x: 700, y: 500, width: 16, height: 16}
     },
+
+    // Level 2 - Moving platforms
     {
         platforms: [
-            { x: 0, y: 550, width: 150, height: 20 },
-            { x: 250, y: 450, width: 150, height: 20 },
-            { x: 500, y: 350, width: 150, height: 20 }
+            {x: 0, y: 550, width: 200, height: 16, type: 'grass'},
+            {x: 600, y: 550, width: 200, height: 16, type: 'grass'}
         ],
-        finish: { x: 600, y: 300, width: 40, height: 40 }
+        movingPlatforms: [
+            {x: 200, y: 500, width: 400, height: 16, speed: 2, direction: 1, type: 'dirt'}
+        ],
+        finish: {x: 700, y: 400, width: 16, height: 16}
     },
+
+    // Level 3 - Spikes and gaps
     {
         platforms: [
-            { x: 0, y: 550, width: 100, height: 20 },
-            { x: 200, y: 450, width: 100, height: 20 },
-            { x: 400, y: 350, width: 100, height: 20 },
-            { x: 600, y: 250, width: 100, height: 20 }
+            {x: 0, y: 550, width: 200, height: 16, type: 'dirt'},
+            {x: 300, y: 550, width: 200, height: 16, type: 'dirt'},
+            {x: 600, y: 550, width: 200, height: 16, type: 'dirt'}
         ],
-        finish: { x: 700, y: 200, width: 40, height: 40 }
+        spikes: [
+            {x: 250, y: 530, width: 40, height: 20}
+        ],
+        finish: {x: 700, y: 500, width: 16, height: 16}
     },
-    {
-        platforms: [
-            { x: 0, y: 550, width: 200, height: 20 },
-            { x: 300, y: 450, width: 200, height: 20 },
-            { x: 600, y: 350, width: 200, height: 20 }
-        ],
-        finish: { x: 700, y: 300, width: 40, height: 40 }
-    },
-    {
-        platforms: [
-            { x: 0, y: 550, width: 200, height: 20 },
-            { x: 300, y: 450, width: 200, height: 20 },
-            { x: 600, y: 350, width: 200, height: 20 }
-        ],
-        finish: { x: 700, y: 300, width: 40, height: 40 }
-    }
+
+    // Add more levels here...
 ];
 
 // Input handling
@@ -94,6 +111,14 @@ document.addEventListener('keyup', (e) => {
     if (e.key === 'ArrowUp') keys.up = false;
 });
 
+// Touch controls
+touchLeft.addEventListener('touchstart', () => keys.left = true);
+touchLeft.addEventListener('touchend', () => keys.left = false);
+touchRight.addEventListener('touchstart', () => keys.right = true);
+touchRight.addEventListener('touchend', () => keys.right = false);
+touchJump.addEventListener('touchstart', () => keys.up = true);
+touchJump.addEventListener('touchend', () => keys.up = false);
+
 // Collision detection
 function checkCollision(rect1, rect2) {
     return rect1.x < rect2.x + rect2.width &&
@@ -106,8 +131,9 @@ function checkCollision(rect1, rect2) {
 function resetPlayer() {
     player.x = 100;
     player.y = 100;
+    player.velocityX = 0;
     player.velocityY = 0;
-    player.isJumping = false;
+    player.isGrounded = false;
 }
 
 // Load a level
@@ -118,6 +144,7 @@ function loadLevel(levelIndex) {
     gameContainer.classList.remove('hidden');
     hubContainer.classList.add('hidden');
     finishedPopup.classList.add('hidden');
+    currentLevelDisplay.textContent = currentLevel + 1;
 }
 
 // Show finished popup
@@ -141,100 +168,4 @@ function checkFinish() {
 function updateLevelsMenu() {
     levelsMenu.innerHTML = '';
     levels.forEach((_, index) => {
-        const button = document.createElement('button');
-        button.textContent = `Level ${index + 1}`;
-        if (unlockedLevels.includes(index)) {
-            button.classList.add('unlocked');
-            button.addEventListener('click', () => loadLevel(index));
-        } else {
-            button.classList.add('locked');
-        }
-        levelsMenu.appendChild(button);
-    });
-}
-
-// Game loop
-function update() {
-    // Horizontal movement
-    if (keys.right) player.x += player.speed;
-    if (keys.left) player.x -= player.speed;
-
-    // Jumping
-    if (keys.up && !player.isJumping) {
-        player.velocityY = -player.jumpForce;
-        player.isJumping = true;
-    }
-
-    // Apply gravity
-    player.velocityY += player.gravity;
-    player.y += player.velocityY;
-
-    // Platform collision
-    player.isJumping = true;
-    levels[currentLevel].platforms.forEach(platform => {
-        if (checkCollision(player, platform)) {
-            if (player.velocityY > 0) {
-                player.isJumping = false;
-                player.velocityY = 0;
-                player.y = platform.y - player.height;
-            }
-        }
-    });
-
-    // Keep player in bounds
-    if (player.y > canvas.height - player.height) {
-        player.y = canvas.height - player.height;
-        player.isJumping = false;
-        player.velocityY = 0;
-    }
-
-    // Check if player reaches the finish
-    checkFinish();
-}
-
-function draw() {
-    // Clear canvas
-    ctx.fillStyle = '#87CEEB';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Draw platforms
-    ctx.fillStyle = '#4CAF50';
-    levels[currentLevel].platforms.forEach(platform => {
-        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-    });
-
-    // Draw finish block
-    const finish = levels[currentLevel].finish;
-    ctx.fillStyle = '#FFD700';
-    ctx.fillRect(finish.x, finish.y, finish.width, finish.height);
-
-    // Draw player
-    ctx.fillStyle = '#FF5722';
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-}
-
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-// Event listeners for buttons
-playButton.addEventListener('click', () => loadLevel(0));
-levelsButton.addEventListener('click', () => {
-    levelsMenu.style.display = 'flex';
-    updateLevelsMenu();
-});
-
-nextLevelButton.addEventListener('click', () => {
-    loadLevel(currentLevel + 1);
-});
-
-mainMenuButton.addEventListener('click', () => {
-    gameContainer.classList.add('hidden');
-    hubContainer.classList.remove('hidden');
-    finishedPopup.classList.add('hidden');
-});
-
-// Start the game
-gameLoop();
+        const button = document.createElement
