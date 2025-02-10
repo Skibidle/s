@@ -5,6 +5,9 @@ const gameContainer = document.getElementById('gameContainer');
 const playButton = document.getElementById('playButton');
 const levelsButton = document.getElementById('levelsButton');
 const levelsMenu = document.getElementById('levelsMenu');
+const finishedPopup = document.getElementById('finishedPopup');
+const nextLevelButton = document.getElementById('nextLevelButton');
+const mainMenuButton = document.getElementById('mainMenuButton');
 
 // Set canvas size
 canvas.width = 800;
@@ -109,32 +112,43 @@ function resetPlayer() {
 
 // Load a level
 function loadLevel(levelIndex) {
+    if (levelIndex >= levels.length || !unlockedLevels.includes(levelIndex)) return;
     currentLevel = levelIndex;
     resetPlayer();
     gameContainer.classList.remove('hidden');
     hubContainer.classList.add('hidden');
+    finishedPopup.classList.add('hidden');
+}
+
+// Show finished popup
+function showFinishedPopup() {
+    finishedPopup.classList.remove('hidden');
 }
 
 // Check if player reaches the finish block
 function checkFinish() {
     const finish = levels[currentLevel].finish;
     if (checkCollision(player, finish)) {
-        alert(`Level ${currentLevel + 1} completed!`);
+        showFinishedPopup();
         if (!unlockedLevels.includes(currentLevel + 1)) {
             unlockedLevels.push(currentLevel + 1);
             updateLevelsMenu();
         }
-        loadLevel(currentLevel + 1);
     }
 }
 
 // Update levels menu
 function updateLevelsMenu() {
     levelsMenu.innerHTML = '';
-    unlockedLevels.forEach(level => {
+    levels.forEach((_, index) => {
         const button = document.createElement('button');
-        button.textContent = `Level ${level + 1}`;
-        button.addEventListener('click', () => loadLevel(level));
+        button.textContent = `Level ${index + 1}`;
+        if (unlockedLevels.includes(index)) {
+            button.classList.add('unlocked');
+            button.addEventListener('click', () => loadLevel(index));
+        } else {
+            button.classList.add('locked');
+        }
         levelsMenu.appendChild(button);
     });
 }
@@ -210,6 +224,16 @@ playButton.addEventListener('click', () => loadLevel(0));
 levelsButton.addEventListener('click', () => {
     levelsMenu.style.display = 'flex';
     updateLevelsMenu();
+});
+
+nextLevelButton.addEventListener('click', () => {
+    loadLevel(currentLevel + 1);
+});
+
+mainMenuButton.addEventListener('click', () => {
+    gameContainer.classList.add('hidden');
+    hubContainer.classList.remove('hidden');
+    finishedPopup.classList.add('hidden');
 });
 
 // Start the game
