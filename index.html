@@ -1,20 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Platformer Game</title>
+    <title>Advanced Platformer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="hub-container" id="hubContainer">
-        <h1>Platformer Game</h1>
+        <h1>Advanced Platformer</h1>
         <button id="playButton">Play</button>
         <button id="levelsButton">Levels</button>
-        <div id="levelsMenu" class="levels-menu">
-            <!-- Levels will be dynamically added here -->
-        </div>
+        <div id="levelsMenu" class="levels-menu"></div>
     </div>
     <div class="game-container hidden" id="gameContainer">
+        <div class="hud">
+            <div>Level: <span id="currentLevel">1</span></div>
+            <div>Coins: <span id="coinCounter">0</span></div>
+            <div>Lives: <span id="livesCounter">3</span></div>
+        </div>
         <canvas id="gameCanvas"></canvas>
+        <div class="touch-controls">
+            <button class="touch-left">←</button>
+            <button class="touch-jump">↑</button>
+            <button class="touch-right">→</button>
+        </div>
     </div>
     <div id="finishedPopup" class="popup hidden">
         <h2>Level Completed!</h2>
