@@ -168,4 +168,76 @@ function checkFinish() {
 function updateLevelsMenu() {
     levelsMenu.innerHTML = '';
     levels.forEach((_, index) => {
-        const button = document.createElement
+        const button = document.createElement('button');
+        button.textContent = `Level ${index + 1}`;
+        if (unlockedLevels.includes(index)) {
+            button.classList.add('unlocked');
+            button.addEventListener('click', () => loadLevel(index));
+        } else {
+            button.classList.add('locked');
+        }
+        levelsMenu.appendChild(button);
+    });
+}
+
+// Game loop
+function update() {
+    handleMovement();
+    handleCollisions();
+    checkFinish();
+}
+
+function draw() {
+    // Clear canvas
+    ctx.fillStyle = '#87CEEB';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw platforms
+    levels[currentLevel].platforms.forEach(platform => {
+        const img = platform.type === 'grass' ? images.grass : images.dirt;
+        for (let i = 0; i < platform.width / 16; i++) {
+            ctx.drawImage(img, platform.x + i * 16, platform.y, 16, 16);
+        }
+    });
+
+    // Draw moving platforms
+    levels[currentLevel].movingPlatforms?.forEach(platform => {
+        const img = platform.type === 'grass' ? images.grass : images.dirt;
+        for (let i = 0; i < platform.width / 16; i++) {
+            ctx.drawImage(img, platform.x + i * 16, platform.y, 16, 16);
+        }
+    });
+
+    // Draw finish block
+    const finish = levels[currentLevel].finish;
+    ctx.drawImage(images.finish, finish.x, finish.y, finish.width, finish.height);
+
+    // Draw player
+    ctx.drawImage(images.player, player.x, player.y, player.width, player.height);
+}
+
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// Event listeners for buttons
+playButton.addEventListener('click', () => loadLevel(0));
+levelsButton.addEventListener('click', () => {
+    levelsMenu.style.display = 'flex';
+    updateLevelsMenu();
+});
+
+nextLevelButton.addEventListener('click', () => {
+    loadLevel(currentLevel + 1);
+});
+
+mainMenuButton.addEventListener('click', () => {
+    gameContainer.classList.add('hidden');
+    hubContainer.classList.remove('hidden');
+    finishedPopup.classList.add('hidden');
+});
+
+// Start the game
+gameLoop();
