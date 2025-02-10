@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Simple Platformer</title>
+    <title>Platformer Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-container">
+    <div class="hub-container" id="hubContainer">
+        <h1>Platformer Game</h1>
+        <button id="playButton">Play</button>
+        <button id="levelsButton">Levels</button>
+        <div id="levelsMenu" class="levels-menu">
+            <!-- Levels will be dynamically added here -->
+        </div>
+    </div>
+    <div class="game-container hidden" id="gameContainer">
         <canvas id="gameCanvas"></canvas>
     </div>
     <script src="game.js"></script>
